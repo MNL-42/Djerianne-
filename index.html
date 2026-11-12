@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#050a12">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>MNL Dev OS</title>
+<style>
+:root{--g:#00e0a4;--b:#2e86ff;--bg:#050a12;--p:rgba(8,17,28,.82);--ln:#16314a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:#cfe;font-family:ui-monospace,Menlo,Consolas,monospace;overflow:hidden;overscroll-behavior:none;touch-action:manipulation}
+#app{position:fixed;left:0;top:0;width:100%;height:100%;overflow:hidden}
+#rain,#three{position:absolute;inset:0;width:100%;height:100%}
+#three{display:none}#three canvas{display:block}
+button{font:inherit;color:#cfe;background:#0b1a2a;border:1px solid var(--ln);border-radius:10px;padding:8px 11px;font-size:13px}
+button:active{background:#12304a}
+/* ---------- écran de verrouillage ---------- */
+#lock{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;color:#fff;
+  padding:calc(env(safe-area-inset-top) + 18px) 0 calc(env(safe-area-inset-bottom) + 22px);transition:transform .35s ease;touch-action:none}
+#lock .top{font-size:22px;margin-top:8px}
+#ldate{margin-top:10px;font-size:19px;color:#bfe;text-transform:capitalize}
+#ltime{font-size:26vw;line-height:1;font-weight:700;letter-spacing:-2px;margin-top:4px;text-shadow:0 0 30px rgba(0,224,164,.55);color:#eafff8}
+#lsub{margin-top:14px;color:var(--g);letter-spacing:3px;font-size:13px}
+#lbat{position:absolute;right:16px;top:calc(env(safe-area-inset-top) + 14px);font-size:13px;color:var(--g)}
+.lbottom{margin-top:auto;text-align:center;color:#9cd;font-size:13px}
+.lbottom i{display:block;width:130px;height:5px;border-radius:3px;background:#fff;margin:0 auto 12px;opacity:.8;animation:up 1.6s ease-in-out infinite}
+@keyframes up{50%{transform:translateY(-8px);opacity:.3}}
+/* ---------- IDE ---------- */
+#ide{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 6px 0;visibility:hidden}
+#top{display:flex;gap:6px;padding:6px 0;align-items:center}
+#files{display:flex;gap:5px;overflow-x:auto;flex:1;scrollbar-width:none}
+#files::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:8px 12px;font-size:13px;background:var(--p);border:1px solid var(--ln);border-radius:10px;color:#7fa0b8}
+.tab.on{color:#fff;border-color:var(--g);box-shadow:0 0 10px rgba(0,224,164,.35)}
+#tools{display:flex;gap:6px;padding-bottom:6px;overflow-x:auto;scrollbar-width:none}
+#tools button{flex:0 0 auto}
+#run{background:var(--g);color:#04121a;font-weight:700;border-color:var(--g)}
+#edwrap{position:relative;flex:1;min-height:0;background:rgba(3,7,16,.78);border:1px solid var(--ln);border-radius:12px;overflow:hidden}
+#hl,#ta{position:absolute;inset:0;margin:0;padding:10px 10px 90px;border:0;font:14px/20px ui-monospace,Menlo,Consolas,monospace;tab-size:4;white-space:pre;letter-spacing:0;word-spacing:0}
+#hl{overflow:hidden;pointer-events:none;color:#d6efe6}
+#ta{width:100%;height:100%;overflow:auto;background:transparent;color:transparent;caret-color:var(--g);outline:0;resize:none}
+#ta::selection{background:rgba(46,134,255,.45)}
+.k{color:#ff7ab2}.s{color:#ffd479}.f{color:#6cb6ff}.c{color:#5c7a92}.n{color:#b794f6}
+#keys{display:flex;gap:5px;overflow-x:auto;padding:6px 0;scrollbar-width:none}
+#keys::-webkit-scrollbar{display:none}
+#keys button{flex:0 0 auto;min-width:40px;padding:9px 8px;font-size:15px}
+#out{display:none;flex-direction:column;height:44%;margin:0 0 6px;background:rgba(3,7,16,.92);border:1px solid var(--ln);border-radius:12px;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)}
+#otabs{display:flex;gap:6px;padding:6px;background:#08111c;border-bottom:1px solid var(--ln)}
+#otabs .on{border-color:var(--g);color:#fff}
+#frame{flex:1;min-height:0;width:100%;border:0;background:#fff}
+#con{flex:1;min-height:0;margin:0;padding:10px;overflow:auto;font-size:13px;line-height:1.5;color:var(--g);white-space:pre-wrap;display:none}
+#con .err{color:#ff7a7a}#con .warn{color:#ffd479}#con .sys{color:#6b8aa3}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="rain"></canvas>
+  <div id="three"></div>
+
+  <section id="ide">
+    <div id="top"><div id="files"></div><button id="add">＋</button></div>
+    <div id="tools">
+      <button id="run">▶ Lancer</button>
+      <button id="ren">✎</button>
+      <button id="del">🗑</button>
+      <button id="bgbtn">Fond 2D</button>
+      <button id="full">⛶</button>
+      <button id="lockbtn">🔒 Verrouiller</button>
+    </div>
+    <div id="edwrap">
+      <pre id="hl"></pre>
+      <textarea id="ta" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+    </div>
+    <div id="keys"></div>
+    <div id="out">
+      <div id="otabs"><button id="tprev" class="on">Aperçu</button><button id="tcon">Console</button><button id="oclose" style="margin-left:auto">✕</button></div>
+      <iframe id="frame" sandbox="allow-scripts allow-modals allow-forms"></iframe>
+      <pre id="con"></pre>
+    </div>
+  </section>
+
+  <section id="lock">
+    <div id="lbat"></div>
+    <div class="top">🔒</div>
+    <div id="ldate"></div>
+    <div id="ltime">--:--</div>
+    <div id="lsub">MANASSE MNL • DEV OS</div>
+    <div class="lbottom"><i></i>Glisse vers le haut pour ouvrir</div>
+  </section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+
+/* ===================== FICHIERS ===================== */
+const DEF={
+'index.html':`<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mon site à Kinshasa</title>
+  <style>
+    body{font-family:sans-serif;text-align:center;padding:40px;background:#0b1522;color:#fff}
+    button{padding:12px 20px;font-size:16px;border:0;border-radius:10px;background:#00e0a4}
+  </style>
+</head>
+<body>
+  <h1>Bienvenue !</h1>
+  <p>Je crée des sites web et des PWA.</p>
+  <button onclick="salut()">Contactez-moi</button>
+  <script>
+    function salut(){
+      console.log("Clic reçu !");
+      alert("Bonjour depuis Kinshasa !");
+    }
+  <\/script>
+</body>
+</html>`,
+'main.py':`# Ma première fonction Python
+def saluer(nom):
+    return "Salut, " + nom + " !"
+
+print("Bonjour Kinshasa !")
+print(saluer("Manasse"))
+
+for i in range(3):
+    print("Partie", i + 1)
+`};
+let files; try{files=JSON.parse(LS('mnl_files'))}catch(e){}
+if(!files||!Object.keys(files).length)files={...DEF};
+let active=LS('mnl_active'); if(!files[active])active=Object.keys(files)[0];
+const save=()=>{LS('mnl_files',JSON.stringify(files));LS('mnl_active',active)};
+
+const ta=$('ta'),hl=$('hl');
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+const sp=(c,t)=>`<span class="${c}">${esc(t)}</span>`;
+const PYK='def|class|return|if|elif|else|for|while|in|import|from|as|try|except|finally|with|lambda|pass|break|continue|and|or|not|is|None|True|False|print|input|range|len|int|str|float|list|dict';
+const JSK='const|let|var|function|return|if|else|for|while|class|new|import|export|true|false|null|undefined|async|await|document|console|alert';
+function highlight(code,name){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  let re,f;
+  if(ext==='py'){re=new RegExp(`(#.*)|("""[\\s\\S]*?"""|'''[\\s\\S]*?'''|"(?:\\\\.|[^"\\\\\\n])*"|'(?:\\\\.|[^'\\\\\\n])*')|\\b(${PYK})\\b|\\b(\\d+\\.?\\d*)\\b`,'g');
+    f=m=>m[1]?sp('c',m[1]):m[2]?sp('s',m[2]):m[3]?sp('k',m[3]):sp('n',m[4]);}
+  else if(ext==='js'||ext==='css'||ext==='json'){re=new RegExp(`(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)|("(?:\\\\.|[^"\\\\\\n])*"|'(?:\\\\.|[^'\\\\\\n])*'|\`(?:\\\\.|[^\`\\\\])*\`)|\\b(${JSK})\\b|\\b(\\d+\\.?\\d*)\\b`,'g');
+    f=m=>m[1]?sp('c',m[1]):m[2]?sp('s',m[2]):m[3]?sp('k',m[3]):sp('n',m[4]);}
+  else{re=/(<!--[\s\S]*?-->)|(<\/?[a-zA-Z][\w-]*)|("[^"]*"|'[^']*')|(\/?>)|\b([a-zA-Z-]+)(?==)/g;
+    f=m=>m[1]?sp('c',m[1]):m[2]?sp('k',m[2]):m[3]?sp('s',m[3]):m[4]?sp('k',m[4]):sp('f',m[5]);}
+  let out='',last=0,m;
+  while((m=re.exec(code))){out+=esc(code.slice(last,m.index))+f(m);last=re.lastIndex;if(m[0]==='')re.lastIndex++}
+  return out+esc(code.slice(last))+'\n';
+}
+const paint=()=>{hl.innerHTML=highlight(ta.value,active)};
+function renderTabs(){
+  $('files').innerHTML=Object.keys(files).map(n=>`<div class="tab ${n===active?'on':''}" data-n="${esc(n)}">${esc(n)}</div>`).join('');
+  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{files[active]=ta.value;active=t.dataset.n;load()});
+}
+function load(){ta.value=files[active];paint();renderTabs();save();ta.scrollTop=ta.scrollLeft=0;hl.scrollTop=hl.scrollLeft=0}
+let st;
+ta.addEventListener('input',()=>{files[active]=ta.value;paint();clearTimeout(st);st=setTimeout(save,400)});
+ta.addEventListener('scroll',()=>{hl.scrollTop=ta.scrollTop;hl.scrollLeft=ta.scrollLeft});
+function ins(t,back=0){ta.setRangeText(t,ta.selectionStart,ta.selectionEnd,'end');if(back){const p=ta.selectionStart-back;ta.setSelectionRange(p,p)}ta.dispatchEvent(new Event('input'))}
+ta.addEventListener('beforeinput',e=>{
+  if(e.inputType==='insertLineBreak'||e.inputType==='insertParagraph'){
+    e.preventDefault();
+    const v=ta.value,s=ta.selectionStart,ls=v.lastIndexOf('\n',s-1)+1,line=v.slice(ls,s);
+    let ind=line.match(/^[ \t]*/)[0];
+    if(/[:{\[(]\s*$/.test(line))ind+='    ';
+    ins('\n'+ind);
+  }
+});
+ta.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();ins('    ')}});
+
+$('add').onclick=()=>{
+  const n=(prompt('Nom du fichier (ex: app.py, style.css, page.html)')||'').trim();
+  if(!n)return; if(files[n]){alert('Ce fichier existe déjà');return}
+  files[active]=ta.value;files[n]='';active=n;load();ta.focus();
+};
+$('ren').onclick=()=>{
+  const n=(prompt('Nouveau nom',active)||'').trim();
+  if(!n||n===active||files[n])return;
+  files[active]=ta.value;files[n]=files[active];delete files[active];active=n;load();
+};
+$('del').onclick=()=>{
+  if(Object.keys(files).length<2){alert('Garde au moins un fichier');return}
+  if(!confirm('Supprimer '+active+' ?'))return;
+  delete files[active];active=Object.keys(files)[0];load();
+};
+
+/* barre de symboles */
+[['Tab','    '],['()','()',1],['[]','[]',1],['{}','{}',1],['""','""',1],["''","''",1],[':',':'],['=','='],['<','<'],['>','>'],['/','/'],['#','#'],['_','_'],['+','+'],['-','-'],['*','*'],['.','.'],[',',','],[';',';'],['!','!'],['\\','\\'],['&','&'],['|','|']]
+ .forEach(([l,t,b])=>{const x=document.createElement('button');x.textContent=l;
+   x.addEventListener('pointerdown',e=>{e.preventDefault();ins(t,b||0);ta.focus()});$('keys').appendChild(x)});
+
+/* ===================== EXÉCUTION ===================== */
+const con=$('con'),frame=$('frame');
+function show(v){$('out').style.display='flex';frame.style.display=v==='prev'?'block':'none';con.style.display=v==='con'?'block':'none';
+  $('tprev').classList.toggle('on',v==='prev');$('tcon').classList.toggle('on',v==='con')}
+function log(t,c){const d=document.createElement('div');if(c)d.className=c;d.textContent=t;con.appendChild(d);con.scrollTop=1e6}
+$('tprev').onclick=()=>show('prev');$('tcon').onclick=()=>show('con');
+$('oclose').onclick=()=>{$('out').style.display='none';frame.srcdoc=''};
+addEventListener('message',e=>{if(e.source===frame.contentWindow&&e.data&&e.data.mnl)log(e.data.m,e.data.t==='error'?'err':e.data.t==='warn'?'warn':'')});
+
+const HOOK=`<script>(function(){var s=function(t,a){parent.postMessage({mnl:1,t:t,m:Array.prototype.map.call(a,function(x){try{return typeof x==='object'?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(' ')},'*')};['log','warn','error','info'].forEach(function(k){var o=console[k];console[k]=function(){s(k,arguments);o.apply(console,arguments)}});window.onerror=function(m,u,l){s('error',[m+' (ligne '+l+')'])}})()<\/script>`;
+function buildPage(name){
+  let h=files[name];
+  if(/\.js$/i.test(name))h='<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:sans-serif"><script>'+h+'<\/script>';
+  h=h.replace(/<link[^>]+href=["']([^"']+\.css)["'][^>]*>/gi,(m,f)=>files[f]!==undefined?'<style>'+files[f]+'</style>':m);
+  h=h.replace(/<script[^>]+src=["']([^"']+\.js)["'][^>]*>\s*<\/script>/gi,(m,f)=>files[f]!==undefined?'<script>'+files[f]+'<\/script>':m);
+  return /<head[^>]*>/i.test(h)?h.replace(/<head[^>]*>/i,m=>m+HOOK):HOOK+h;
+}
+let py=null;
+function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ko(new Error('Chargement impossible : '+src));document.head.appendChild(s)})}
+async function getPy(){
+  if(py)return py;
+  log('Chargement de Python… (internet requis la 1ère fois)','sys');
+  await loadScript('https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js');
+  py=await loadPyodide();
+  py.setStdout({batched:s=>log(s)});py.setStderr({batched:s=>log(s,'err')});
+  py.setStdin({stdin:()=>prompt('input()')});
+  log('Python prêt ✔','sys');return py;
+}
+async function run(){
+  files[active]=ta.value;save();
+  const ext=(active.split('.').pop()||'').toLowerCase();
+  if(ext==='html'||ext==='htm'||ext==='js'){con.innerHTML='';show('prev');frame.srcdoc=buildPage(active);return}
+  if(ext==='py'){
+    con.innerHTML='';show('con');
+    try{
+      const p=await getPy();
+      for(const n in files)if(/\.py$/i.test(n))p.FS.writeFile(n,files[n]);
+      log('$ python '+active,'sys');
+      await p.runPythonAsync(files[active]);
+      log('— terminé —','sys');
+    }catch(e){log(String(e.message||e),'err')}
+    return;
+  }
+  con.innerHTML='';show('con');log('Ce type de fichier ne se lance pas. Utilise .html, .js ou .py','warn');
+}
+$('run').onclick=run;
+
+/* ===================== FOND 2D / 3D ===================== */
+const cv=$('rain'),cx=cv.getContext('2d');
+let W,H,layers=[],bg=LS('mnl_bg')==='3d'?'3d':'2d';
+function fit2d(){
+  W=cv.width=innerWidth;H=cv.height=innerHeight;
+  layers=[[12,.9,.28],[18,1.8,.55],[26,3.2,1]].map(([size,speed,alpha])=>{
+    const cols=Math.ceil(W/size);
+    return{size,speed,alpha,y:Array.from({length:cols},()=>-Math.random()*H)}});
+}
+function rain(){
+  if(bg!=='2d')return;
+  cx.fillStyle='rgba(5,10,18,.16)';cx.fillRect(0,0,W,H);
+  for(const L of layers){
+    cx.font=L.size+'px monospace';
+    for(let i=0;i<L.y.length;i++){
+      const head=Math.random()<.04;
+      cx.fillStyle=head&&L.alpha===1?'#fff':`rgba(0,224,164,${L.alpha})`;
+      cx.fillText(Math.random()<.5?'0':'1',i*L.size,L.y[i]);
+      L.y[i]+=L.speed*L.size*.22;
+      if(L.y[i]>H&&Math.random()>.975)L.y[i]=-Math.random()*H*.5;
+    }
+  }
+  requestAnimationFrame(rain);
+}
+let T3=null;
+async function start3d(){
+  if(!window.THREE)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+  if(!T3){
+    const sc=new THREE.Scene();sc.fog=new THREE.Fog(0x050a12,6,48);
+    const cam=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,100);
+    const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+    r.setPixelRatio(Math.min(devicePixelRatio,1.5));r.setSize(innerWidth,innerHeight);
+    $('three').appendChild(r.domElement);
+    const mk=ch=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
+      g.font='bold 54px monospace';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#00e0a4';g.shadowColor='#00e0a4';g.shadowBlur=10;g.fillText(ch,32,34);
+      return new THREE.CanvasTexture(c)};
+    const mats=[mk('0'),mk('1')].map(map=>new THREE.SpriteMaterial({map,transparent:true,fog:true}));
+    const sprites=[];
+    for(let i=0;i<380;i++){
+      const s=new THREE.Sprite(mats[i%2]);
+      s.position.set((Math.random()-.5)*60,(Math.random()-.5)*40,-Math.random()*45+8);
+      s.scale.set(1.5,1.5,1);s.userData.v=.05+Math.random()*.12;sc.add(s);sprites.push(s)}
+    T3={sc,cam,r,sprites,t:0};
+    addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight)});
+  }
+  (function loop(){
+    if(bg!=='3d')return;
+    const{sc,cam,r,sprites}=T3;T3.t+=.008;
+    cam.position.set(Math.sin(T3.t)*7,Math.sin(T3.t*.7)*2,6);cam.lookAt(0,0,-15);
+    sprites.forEach(s=>{s.position.y-=s.userData.v;if(s.position.y<-20)s.position.y=20});
+    r.render(sc,cam);requestAnimationFrame(loop);
+  })();
+}
+async function setBg(m){
+  bg=m;LS('mnl_bg',m);
+  $('bgbtn').textContent=m==='2d'?'Fond 2D':'Fond 3D';
+  cv.style.display=m==='2d'?'block':'none';$('three').style.display=m==='3d'?'block':'none';
+  if(m==='2d'){fit2d();rain()}
+  else{try{await start3d()}catch(e){alert('3D indisponible (internet requis la 1ère fois). Retour en 2D.');setBg('2d')}}
+}
+$('bgbtn').onclick=()=>setBg(bg==='2d'?'3d':'2d');
+addEventListener('resize',()=>{if(bg==='2d')fit2d()});
+
+/* ===================== VERROUILLAGE ===================== */
+const lock=$('lock'),ide=$('ide');
+function tick(){
+  const n=new Date();
+  $('ltime').textContent=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  $('ldate').textContent=n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+}
+tick();setInterval(tick,1000);
+navigator.getBattery&&navigator.getBattery().then(b=>{const u=()=>$('lbat').textContent='⚡ '+Math.round(b.level*100)+'%';u();b.onlevelchange=u});
+
+let wl=null;
+async function wake(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
+function goFull(){try{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen).call(d)}catch(e){}}
+
+function unlock(){lock.style.transition='transform .35s ease';lock.style.transform='translateY(-105%)';ide.style.visibility='visible';goFull();wake();
+  setTimeout(()=>{lock.style.display='none'},360)}
+function doLock(){files[active]=ta.value;save();ta.blur();lock.style.display='flex';lock.style.transition='none';lock.style.transform='translateY(-105%)';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{lock.style.transition='transform .35s ease';lock.style.transform='translateY(0)'}));
+  setTimeout(()=>{ide.style.visibility='hidden'},360);wake()}
+let y0=null;
+lock.addEventListener('touchstart',e=>{y0=e.touches[0].clientY;lock.style.transition='none';ide.style.visibility='visible';wake()},{passive:true});
+lock.addEventListener('touchmove',e=>{const dy=Math.min(0,e.touches[0].clientY-y0);lock.style.transform=`translateY(${dy}px)`},{passive:true});
+lock.addEventListener('touchend',e=>{
+  const dy=e.changedTouches[0].clientY-y0;
+  if(dy<-90)unlock();
+  else{lock.style.transition='transform .25s ease';lock.style.transform='translateY(0)';ide.style.visibility='hidden'}
+});
+lock.addEventListener('click',e=>{if(e.detail&&e.pointerType==='mouse')unlock()});
+$('lockbtn').onclick=doLock;
+$('full').onclick=()=>{document.fullscreenElement?document.exitFullscreen():goFull()};
+
+/* hauteur = clavier pris en compte */
+function fitApp(){const h=(window.visualViewport?visualViewport.height:innerHeight);$('app').style.height=h+'px'}
+fitApp();window.visualViewport&&visualViewport.addEventListener('resize',fitApp);addEventListener('resize',fitApp);
+
+/* démarrage */
+load();setBg(bg);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
