@@ -52,22 +52,63 @@ button:active{background:#12304a}
 #frame{flex:1;min-height:0;width:100%;border:0;background:#fff}
 #con{flex:1;min-height:0;margin:0;padding:10px;overflow:auto;font-size:13px;line-height:1.5;color:var(--g);white-space:pre-wrap;display:none}
 #con .err{color:#ff7a7a}#con .warn{color:#ffd479}#con .sys{color:#6b8aa3}
+/* ---- verre (liquid glass) ---- */
+button,.tab{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 6px 18px rgba(0,0,0,.3);backdrop-filter:blur(16px) saturate(170%);-webkit-backdrop-filter:blur(16px) saturate(170%);color:#e8fff8}
+button:active{background:rgba(255,255,255,.2)}
+#run{background:linear-gradient(135deg,rgba(0,224,164,.85),rgba(0,160,255,.7));color:#03131c;border-color:rgba(255,255,255,.4)}
+.tab.on{background:rgba(0,224,164,.22);border-color:rgba(0,224,164,.7)}
+#edwrap,#out{background:rgba(6,14,26,.42);border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 40px rgba(0,0,0,.45);backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%)}
+#otabs{background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.15)}
+#otabs .on{background:rgba(0,224,164,.22)}
+/* ---- écran verrouillé style iPhone 17 ---- */
+#ldate{font-size:20px;font-weight:500;color:rgba(255,255,255,.88);margin-top:8px}
+#lock .top{font-size:20px;opacity:.9}
+.glass{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%)}
+.notif{width:calc(100% - 32px);max-width:420px;margin-top:22px;padding:13px 16px;border-radius:22px;display:flex;flex-direction:column;gap:3px;text-align:left;color:#fff}
+.notif b{font-size:12px;color:var(--g);letter-spacing:1.5px}.notif span{font-size:14px;color:rgba(255,255,255,.88)}
+.lbottom{width:100%;padding:0 34px}
+.lrow{display:flex;justify-content:space-between;margin-bottom:16px}
+.gb{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:23px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.hint{display:block;font-size:12px;opacity:.7;margin-bottom:12px}
+.lbottom i{width:134px;height:5px;margin:0 auto;animation:none;opacity:.9}
+/* ---- icônes, puce système, horloge géante ---- */
+button{display:inline-flex;align-items:center;justify-content:center}
+.ic{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-right:6px;flex:0 0 auto}
+button .ic:only-child{margin-right:0}
+.gb .ic{width:24px;height:24px;margin:0;color:#fff}
+.chip{margin-top:6px;padding:6px 14px;border-radius:99px;font-size:11px;letter-spacing:2px;color:#cfe;display:flex;align-items:center;gap:8px}
+.chip b{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 10px var(--g);animation:pl 2s infinite}
+@keyframes pl{50%{opacity:.3}}
+#ltime{display:flex;flex-direction:column;align-items:center;font:700 min(48vw,26vh)/.82 ui-rounded,"SF Pro Rounded",system-ui,Roboto,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.04em;margin:8px 0 0;text-shadow:none;filter:drop-shadow(0 10px 34px rgba(0,224,164,.35))}
+#ltime span{padding:.06em .04em;margin:-.06em 0;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(190,255,235,.16));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
 <div id="app">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></symbol>
+<symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8M6.5 6.5a8 8 0 1011 0"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-torch" viewBox="0 0 24 24"><path d="M8 3h8v4l-2 3v11h-4V10L8 7zM8 7h8"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+</defs></svg>
   <canvas id="rain"></canvas>
   <div id="three"></div>
 
   <section id="ide">
-    <div id="top"><div id="files"></div><button id="add">＋</button></div>
+    <div id="top"><div id="files"></div><button id="add"><svg class="ic"><use href="#i-plus"/></svg></button></div>
     <div id="tools">
-      <button id="run">▶ Lancer</button>
-      <button id="ren">✎</button>
-      <button id="del">🗑</button>
+      <button id="run"><svg class="ic"><use href="#i-play"/></svg>Lancer</button>
+      <button id="ren"><svg class="ic"><use href="#i-edit"/></svg></button>
+      <button id="del"><svg class="ic"><use href="#i-trash"/></svg></button>
       <button id="bgbtn">Fond 2D</button>
-      <button id="full">⛶</button>
-      <button id="lockbtn">🔒 Verrouiller</button>
+      <button id="full"><svg class="ic"><use href="#i-full"/></svg></button>
+      <button id="offl">Hors-ligne</button>
+      <button id="lockbtn"><svg class="ic"><use href="#i-power"/></svg>Veille</button>
     </div>
     <div id="edwrap">
       <pre id="hl"></pre>
@@ -75,7 +116,7 @@ button:active{background:#12304a}
     </div>
     <div id="keys"></div>
     <div id="out">
-      <div id="otabs"><button id="tprev" class="on">Aperçu</button><button id="tcon">Console</button><button id="oclose" style="margin-left:auto">✕</button></div>
+      <div id="otabs"><button id="tprev" class="on">Aperçu</button><button id="tcon">Console</button><button id="oclose" style="margin-left:auto"><svg class="ic"><use href="#i-close"/></svg></button></div>
       <iframe id="frame" sandbox="allow-scripts allow-modals allow-forms"></iframe>
       <pre id="con"></pre>
     </div>
@@ -83,11 +124,11 @@ button:active{background:#12304a}
 
   <section id="lock">
     <div id="lbat"></div>
-    <div class="top">🔒</div>
+    <div class="chip glass"><b></b>SYSTÈME ACTIF</div>
     <div id="ldate"></div>
-    <div id="ltime">--:--</div>
-    <div id="lsub">MANASSE MNL • DEV OS</div>
-    <div class="lbottom"><i></i>Glisse vers le haut pour ouvrir</div>
+    <div id="ltime"><span id="lh">--</span><span id="lm">--</span></div>
+    <div class="notif glass"><b>MANASSE MNL • DEV OS</b><span>Ton espace de codeur est prêt.</span></div>
+    <div class="lbottom"><div class="lrow"><span class="gb"><svg class="ic"><use href="#i-torch"/></svg></span><span class="gb"><svg class="ic"><use href="#i-cam"/></svg></span></div><span class="hint">Glisse vers le haut pour ouvrir</span><i></i></div>
   </section>
 </div>
 
@@ -213,7 +254,7 @@ function buildPage(name){
   return /<head[^>]*>/i.test(h)?h.replace(/<head[^>]*>/i,m=>m+HOOK):HOOK+h;
 }
 let py=null;
-function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>ko(new Error('Chargement impossible : '+src));document.head.appendChild(s)})}
+function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.crossOrigin='anonymous';s.src=src;s.onload=ok;s.onerror=()=>ko(new Error('Chargement impossible : '+src));document.head.appendChild(s)})}
 async function getPy(){
   if(py)return py;
   log('Chargement de Python… (internet requis la 1ère fois)','sys');
@@ -221,7 +262,7 @@ async function getPy(){
   py=await loadPyodide();
   py.setStdout({batched:s=>log(s)});py.setStderr({batched:s=>log(s,'err')});
   py.setStdin({stdin:()=>prompt('input()')});
-  log('Python prêt ✔','sys');return py;
+  log('Python prêt','sys');return py;
 }
 async function run(){
   files[active]=ta.value;save();
@@ -244,12 +285,12 @@ $('run').onclick=run;
 
 /* ===================== FOND 2D / 3D ===================== */
 const cv=$('rain'),cx=cv.getContext('2d');
-let W,H,layers=[],bg=LS('mnl_bg')==='3d'?'3d':'2d';
+let W,H,layers=[],bg=LS('mnl_bg')==='2d'?'2d':'3d';
 function fit2d(){
   W=cv.width=innerWidth;H=cv.height=innerHeight;
-  layers=[[12,.9,.28],[18,1.8,.55],[26,3.2,1]].map(([size,speed,alpha])=>{
-    const cols=Math.ceil(W/size);
-    return{size,speed,alpha,y:Array.from({length:cols},()=>-Math.random()*H)}});
+  layers=[[9,.7,.18],[11,.9,.25],[14,1.2,.35],[18,1.8,.55],[22,2.5,.8],[28,3.4,1]].map(([size,speed,alpha])=>{
+    const step=size*.65,cols=Math.ceil(W/step);
+    return{size,speed,alpha,step,y:Array.from({length:cols},()=>-Math.random()*H)}});
 }
 function rain(){
   if(bg!=='2d')return;
@@ -259,40 +300,77 @@ function rain(){
     for(let i=0;i<L.y.length;i++){
       const head=Math.random()<.04;
       cx.fillStyle=head&&L.alpha===1?'#fff':`rgba(0,224,164,${L.alpha})`;
-      cx.fillText(Math.random()<.5?'0':'1',i*L.size,L.y[i]);
-      L.y[i]+=L.speed*L.size*.22;
+      cx.fillText(Math.random()<.5?'0':'1',i*L.step,L.y[i]);
+      L.y[i]+=L.speed*L.size*.11;
       if(L.y[i]>H&&Math.random()>.975)L.y[i]=-Math.random()*H*.5;
     }
   }
   requestAnimationFrame(rain);
 }
-let T3=null;
-async function start3d(){
-  if(!window.THREE)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
-  if(!T3){
-    const sc=new THREE.Scene();sc.fog=new THREE.Fog(0x050a12,6,48);
-    const cam=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.1,100);
-    const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
-    r.setPixelRatio(Math.min(devicePixelRatio,1.5));r.setSize(innerWidth,innerHeight);
-    $('three').appendChild(r.domElement);
-    const mk=ch=>{const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');
-      g.font='bold 54px monospace';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#00e0a4';g.shadowColor='#00e0a4';g.shadowBlur=10;g.fillText(ch,32,34);
-      return new THREE.CanvasTexture(c)};
-    const mats=[mk('0'),mk('1')].map(map=>new THREE.SpriteMaterial({map,transparent:true,fog:true}));
-    const sprites=[];
-    for(let i=0;i<380;i++){
-      const s=new THREE.Sprite(mats[i%2]);
-      s.position.set((Math.random()-.5)*60,(Math.random()-.5)*40,-Math.random()*45+8);
-      s.scale.set(1.5,1.5,1);s.userData.v=.05+Math.random()*.12;sc.add(s);sprites.push(s)}
-    T3={sc,cam,r,sprites,t:0};
-    addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();r.setSize(innerWidth,innerHeight)});
+let GL=null;
+const VS=`attribute vec4 a;attribute vec2 b;
+uniform float t,ang,asp,ps;
+varying float vA,vG,vB;
+void main(){
+  float hh=.6*(-a.z)+2.;
+  float y=mod(a.y-t*b.x+hh,2.*hh)-hh;
+  vec3 q=vec3(a.x,y,a.z+22.);
+  float c=cos(ang),s=sin(ang);
+  q=vec3(c*q.x+s*q.z,q.y,-s*q.x+c*q.z);
+  q.z-=22.;
+  float d=-q.z;
+  gl_Position=vec4(q.x*1.8/asp,q.y*1.8,0.,max(d,.01));
+  gl_PointSize=d>.6?min(ps*260./d,110.):0.;
+  vA=clamp(1.-(d-4.)/46.,0.,1.)*smoothstep(.6,3.,d);
+  vG=a.w;vB=b.y;
+}`;
+const FS=`precision mediump float;
+uniform sampler2D tx;varying float vA,vG,vB;
+void main(){
+  float al=texture2D(tx,vec2((vG+gl_PointCoord.x)*.5,gl_PointCoord.y)).a;
+  vec3 col=mix(vec3(0.,.88,.64),vec3(.85,1.,.95),vB);
+  gl_FragColor=vec4(col*al*vA,al*vA);
+}`;
+function start3d(){
+  if(!GL){
+    const c=document.createElement('canvas');c.style.cssText='display:block;width:100%;height:100%';
+    const gl=c.getContext('webgl',{alpha:true,antialias:false,premultipliedAlpha:true});
+    if(!gl)throw new Error('webgl');
+    const sh=(ty,src)=>{const o=gl.createShader(ty);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o};
+    const pr=gl.createProgram();
+    gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');
+    gl.useProgram(pr);
+    const N=3200,d=new Float32Array(N*6);
+    for(let i=0;i<N;i++){
+      const dist=3+Math.random()*44,hh=.6*dist+2;
+      d.set([(Math.random()*2-1)*(.34*dist+3),(Math.random()*2-1)*hh,-dist,Math.random()<.5?0:1,.35+Math.random()*1.1,Math.random()<.12?1:Math.random()*.4],i*6);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,d,gl.STATIC_DRAW);
+    const la=gl.getAttribLocation(pr,'a'),lb=gl.getAttribLocation(pr,'b');
+    gl.enableVertexAttribArray(la);gl.vertexAttribPointer(la,4,gl.FLOAT,false,24,0);
+    gl.enableVertexAttribArray(lb);gl.vertexAttribPointer(lb,2,gl.FLOAT,false,24,16);
+    const tc=document.createElement('canvas');tc.width=128;tc.height=64;const g=tc.getContext('2d');
+    g.font='bold 54px monospace';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#fff';g.fillText('0',32,34);g.fillText('1',96,34);
+    gl.bindTexture(gl.TEXTURE_2D,gl.createTexture());
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,tc);
+    [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]].forEach(([k,v])=>gl.texParameteri(gl.TEXTURE_2D,k,v));
+    gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE);
+    const U=n=>gl.getUniformLocation(pr,n);
+    GL={c,gl,N,id:0,u:{t:U('t'),ang:U('ang'),asp:U('asp'),ps:U('ps')}};
+    $('three').appendChild(c);
+    addEventListener('resize',()=>GL.rs&&GL.rs());
   }
+  const{c,gl,N,u}=GL;
+  GL.rs=()=>{const r=Math.min(devicePixelRatio||1,2);c.width=Math.round(innerWidth*r);c.height=Math.round(innerHeight*r);gl.viewport(0,0,c.width,c.height);gl.uniform1f(u.asp,c.width/c.height);gl.uniform1f(u.ps,r)};
+  GL.rs();
+  const me=++GL.id,t0=performance.now();
   (function loop(){
-    if(bg!=='3d')return;
-    const{sc,cam,r,sprites}=T3;T3.t+=.008;
-    cam.position.set(Math.sin(T3.t)*7,Math.sin(T3.t*.7)*2,6);cam.lookAt(0,0,-15);
-    sprites.forEach(s=>{s.position.y-=s.userData.v;if(s.position.y<-20)s.position.y=20});
-    r.render(sc,cam);requestAnimationFrame(loop);
+    if(bg!=='3d'||me!==GL.id)return;
+    const t=(performance.now()-t0)/1000;
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(u.t,t);gl.uniform1f(u.ang,Math.sin(t*.25)*.35);
+    gl.drawArrays(gl.POINTS,0,N);requestAnimationFrame(loop);
   })();
 }
 async function setBg(m){
@@ -300,7 +378,7 @@ async function setBg(m){
   $('bgbtn').textContent=m==='2d'?'Fond 2D':'Fond 3D';
   cv.style.display=m==='2d'?'block':'none';$('three').style.display=m==='3d'?'block':'none';
   if(m==='2d'){fit2d();rain()}
-  else{try{await start3d()}catch(e){alert('3D indisponible (internet requis la 1ère fois). Retour en 2D.');setBg('2d')}}
+  else{try{await start3d()}catch(e){setBg('2d')}}
 }
 $('bgbtn').onclick=()=>setBg(bg==='2d'?'3d':'2d');
 addEventListener('resize',()=>{if(bg==='2d')fit2d()});
@@ -309,15 +387,16 @@ addEventListener('resize',()=>{if(bg==='2d')fit2d()});
 const lock=$('lock'),ide=$('ide');
 function tick(){
   const n=new Date();
-  $('ltime').textContent=n.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  $('lh').textContent=String(n.getHours()).padStart(2,'0');$('lm').textContent=String(n.getMinutes()).padStart(2,'0');
   $('ldate').textContent=n.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
 }
 tick();setInterval(tick,1000);
-navigator.getBattery&&navigator.getBattery().then(b=>{const u=()=>$('lbat').textContent='⚡ '+Math.round(b.level*100)+'%';u();b.onlevelchange=u});
+navigator.getBattery&&navigator.getBattery().then(b=>{const u=()=>$('lbat').textContent=Math.round(b.level*100)+'%';u();b.onlevelchange=u});
 
 let wl=null;
-async function wake(){try{wl=await navigator.wakeLock.request('screen')}catch(e){}}
+async function wake(){try{if(wl)return;wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null})}catch(e){wl=null}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake()});
+addEventListener('pointerdown',wake,{passive:true});setInterval(wake,10000);wake();
 function goFull(){try{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen).call(d)}catch(e){}}
 
 function unlock(){lock.style.transition='transform .35s ease';lock.style.transform='translateY(-105%)';ide.style.visibility='visible';goFull();wake();
@@ -341,7 +420,16 @@ $('full').onclick=()=>{document.fullscreenElement?document.exitFullscreen():goFu
 function fitApp(){const h=(window.visualViewport?visualViewport.height:innerHeight);$('app').style.height=h+'px'}
 fitApp();window.visualViewport&&visualViewport.addEventListener('resize',fitApp);addEventListener('resize',fitApp);
 
+/* télécharger Python + 3D une fois (avec internet) pour tout avoir hors-ligne */
+$('offl').onclick=async()=>{
+  const b=$('offl');b.textContent='Téléchargement…';
+  try{
+    await getPy();b.textContent='Prêt hors-ligne';
+  }catch(e){b.textContent='Hors-ligne';alert('Il faut une connexion (Wi-Fi ou données) une seule fois.')}
+};
+
 /* démarrage */
+addEventListener('pointerdown',()=>{if(!document.fullscreenElement)goFull()},{once:true});
 load();setBg(bg);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
