@@ -1,7 +1,7 @@
 {
-  "name": "MNL Dev OS",
-  "short_name": "MNL Dev",
-  "description": "Éditeur de code mobile (HTML, Python) par MANASSE MNL",
+  "name": "MNL OS",
+  "short_name": "MNL OS",
+  "description": "Système mobile par MANASSE MNL : code, photo, galerie, réglages",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
